@@ -63,21 +63,21 @@ const editForm = reactive({ role: 'end_user' })
 const formatDate = (d: string) => d ? d.substring(0, 10) : '-'
 const roleLabel = (r: string) => ({ tenant_admin: '管理员', end_user: '成员', super_admin: '超级管理员' }[r] || r)
 
-const fetchMembers = async () => { try { const r = await axios.get(API); members.value = r.data.data || [] } catch { members.value = [] } }
+const fetchMembers = async () => { try { const r = await axios.get(API.value); members.value = r.data.data || [] } catch { members.value = [] } }
 
 const handleInvite = async () => {
-  try { await axios.post(API, inviteForm); showInvite.value = false; inviteForm.email = ''; inviteForm.role = 'end_user'; await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '邀请失败') }
+  try { await axios.post(API.value, inviteForm); showInvite.value = false; inviteForm.email = ''; inviteForm.role = 'end_user'; await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '邀请失败') }
 }
 
-const openEdit = (m: any) => { editMember.value = m; editForm.role = m.role }
+const openEdit = (m: any) => { editMember.value = m; editForm.role = typeof m.role === 'string' ? m.role : m.role?.name || 'end_user' }
 
 const handleUpdate = async () => {
-  try { await axios.put(`${API}/${editMember.value.user_id}`, { role: editForm.role }); editMember.value = null; await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '更新失败') }
+  try { await axios.put(`${API.value}/${editMember.value.user_id}`, { role: editForm.role }); editMember.value = null; await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '更新失败') }
 }
 
 const handleRemove = async (m: any) => {
   if (!confirm(`确定移除成员 ${m.name}？`)) return
-  try { await axios.delete(`${API}/${m.user_id}`); await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '移除失败') }
+  try { await axios.delete(`${API.value}/${m.user_id}`); await fetchMembers() } catch (e: any) { alert(e.response?.data?.message || '移除失败') }
 }
 
 onMounted(fetchMembers)
